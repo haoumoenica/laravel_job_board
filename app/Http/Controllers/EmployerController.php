@@ -2,63 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class EmployerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function create(Request $request)
     {
-        //
+        try {
+            Gate::authorize('create', Employer::class);
+        } catch (AuthorizationException $e) {
+            return view('employer.create')->with('error', 'You already have an employer account.');
+        }
+
+        return view('employer.create');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
+        try {
+            Gate::authorize('create', Employer::class);
+        } catch (AuthorizationException $e) {
+            return redirect()->route('employer.create')
+                ->with('error', 'You already have an employer account.');
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $validated = $request->validate([
+            'company_name' => 'required|min:3|unique:employers,company_name'
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        $request->user()->employer()->create($validated);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('jobs.index')
+            ->with('success', 'Your employer account was created!');
     }
 }

@@ -15,6 +15,15 @@ class Job extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'title',
+        'location',
+        'salary',
+        'description',
+        'experience',
+        'category'
+    ];
+
     // Specify the custom table name
     protected $table = 'job_listings'; // Your custom table name in the database
 
